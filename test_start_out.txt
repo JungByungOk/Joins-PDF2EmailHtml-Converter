@@ -1,0 +1,29 @@
+
+> pdf2email@1.0.0 start
+> electron-forge start
+
+[33m❯[39m Checking your system
+[33m❯[39m Checking package manager version
+[32m✔[39m Found npm@11.8.0
+[32m✔[39m Checking your system
+[?25h[33m❯[39m Locating application
+[32m✔[39m Locating application
+[33m❯[39m Loading configuration
+[32m✔[39m Loading configuration
+[33m❯[39m Preparing native dependencies
+[32m✔[39m Preparing native dependencies
+[33m❯[39m Running generateAssets hook
+[32m✔[39m Running generateAssets hook
+[33m❯[39m Running preStart hook
+[33m❯[39m [plugin-webpack] Preparing webpack bundles
+[33m❯[39m Compiling main process code
+[32m✔[39m Compiling main process code
+[33m❯[39m Launching dev servers for renderer process code
+› Output Available: http://localhost:9000
+
+[32m✔[39m Launching dev servers for renderer process code
+[32m✔[39m [plugin-webpack] Preparing webpack bundles
+[32m✔[39m Running preStart hook
+[32m✔[39m Launched Electron app. Type rs in terminal to restart main process.
+[?25h
+

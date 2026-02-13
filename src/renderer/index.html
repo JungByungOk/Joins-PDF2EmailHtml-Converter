@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Joins PDF2Email Converter</title>
+</head>
+<body>
+  <!-- Back Button (fixed top-left) -->
+  <button id="btnBack" class="btn-back hidden">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 18 9 12 15 6"/>
+    </svg>
+    처음으로
+  </button>
+
+  <div class="app">
+    <header class="header">
+      <img src="data:image/png;base64,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" alt="Logo" class="header-logo">
+      <p class="subtitle">PDF 보고서를 이메일 친화적인 HTML로 빠르게 변환합니다.</p>
+      <p class="hashtags">#업무자동화, #빠른보고 #워크플로우개선</p>
+    </header>
+
+    <!-- Drop Zone -->
+    <div id="dropZone" class="drop-zone">
+      <div class="drop-zone-content">
+        <div class="drop-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4A6CF7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="12" y1="18" x2="12" y2="12"/>
+            <line x1="9" y1="15" x2="12" y2="12"/>
+            <line x1="15" y1="15" x2="12" y2="12"/>
+          </svg>
+        </div>
+        <p class="drop-text">PDF 파일을 여기에 드래그하거나</p>
+        <button id="btnSelectFile" class="btn btn-primary">파일 선택</button>
+      </div>
+    </div>
+
+    <!-- Recent Files -->
+    <div id="recentSection" class="recent-files hidden">
+      <div class="recent-header">최근 파일</div>
+      <div id="recentList" class="recent-list"></div>
+    </div>
+
+    <!-- File Info -->
+    <div id="fileInfo" class="file-info hidden">
+      <div class="file-name" id="fileName"></div>
+      <div class="file-pages" id="filePages"></div>
+    </div>
+
+    <!-- Settings -->
+    <div id="presetSection" class="preset-section hidden">
+      <div class="section-title-row" id="helpTrigger">
+        <span class="section-title">
+          <span class="section-title-icon">ℹ</span>
+          설정
+        </span>
+      </div>
+      <div class="setting-row">
+        <label class="setting-label">렌더링 DPI</label>
+        <div class="slider-wrap">
+          <input type="range" id="dpiSlider" class="slider" min="100" max="400" step="1" value="200">
+          <div class="slider-labels">
+            <span>100</span>
+            <span>200</span>
+            <span>300</span>
+            <span>400</span>
+          </div>
+        </div>
+        <span class="setting-value" id="dpiValue">200 DPI</span>
+      </div>
+      <div class="setting-row" style="margin-top:14px;">
+        <label class="setting-label">이미지 배율</label>
+        <div class="slider-wrap">
+          <input type="range" id="widthSlider" class="slider" min="10" max="100" step="1" value="45">
+          <div class="slider-labels">
+            <span>10%</span>
+            <span>30%</span>
+            <span>50%</span>
+            <span>100%</span>
+          </div>
+        </div>
+        <span class="setting-value" id="widthValue">45%</span>
+      </div>
+      <div class="setting-row setting-row-checkbox" style="margin-top:14px;">
+        <label class="setting-label" for="trimToggle">여백 줄이기</label>
+        <label class="toggle-switch">
+          <input type="checkbox" id="trimToggle">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="trim-sub-settings">
+        <div class="setting-row trim-sub-row" style="margin-top:10px;">
+          <label class="setting-label">여백 탐지</label>
+          <div class="slider-wrap">
+            <input type="range" id="trimGapSlider" class="slider" min="1" max="100" step="1" value="65" disabled>
+            <div class="slider-labels">
+              <span>1</span>
+              <span>25</span>
+              <span>50</span>
+              <span>75</span>
+              <span>100</span>
+            </div>
+          </div>
+          <span class="setting-value" id="trimGapValue">65 px</span>
+        </div>
+        <div class="setting-row trim-sub-row" style="margin-top:10px;">
+          <label class="setting-label">남길 여백</label>
+          <div class="slider-wrap">
+            <input type="range" id="trimKeepSlider" class="slider" min="0" max="100" step="1" value="30" disabled>
+            <div class="slider-labels">
+              <span>0%</span>
+              <span>25%</span>
+              <span>50%</span>
+              <span>75%</span>
+              <span>100%</span>
+            </div>
+          </div>
+          <span class="setting-value" id="trimKeepValue">30%</span>
+        </div>
+      </div>
+      <p class="setting-hint">DPI와 이미지 배율이 높을수록 선명하지만 용량이 증가합니다</p>
+      <button id="btnConvert" class="btn btn-primary btn-convert">변환 시작</button>
+    </div>
+
+    <!-- Progress -->
+    <div id="progressSection" class="progress-section hidden">
+      <div class="progress-label">
+        <span id="progressText">처리 중...</span>
+        <span id="progressPercent">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+
+      <!-- Size Gauge -->
+      <div class="size-gauge">
+        <div class="size-label">
+          <span>이메일 용량</span>
+          <span id="sizeText">0 MB / 25 MB</span>
+        </div>
+        <div class="size-bar">
+          <div id="sizeFill" class="size-fill"></div>
+        </div>
+        <div id="sizeWarning" class="size-warning hidden"></div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="resultSection" class="result-section hidden">
+      <h2>변환 완료!</h2>
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-value" id="statPages">0</span>
+          <span class="stat-label">페이지</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="statLinks">0</span>
+          <span class="stat-label">링크</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="statSize">0 MB</span>
+          <span class="stat-label">총 용량</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="statAvgSize">0 KB</span>
+          <span class="stat-label">페이지 평균</span>
+        </div>
+      </div>
+      <div class="result-actions">
+        <button id="btnPreview" class="btn btn-primary">브라우저에서 미리보기</button>
+        <button id="btnOpenFolder" class="btn btn-secondary">출력 폴더 열기</button>
+        <button id="btnNewFile" class="btn btn-secondary">처음으로</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help Modal -->
+  <div id="helpModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-title">설정 도움말</span>
+        <button id="btnCloseHelp" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="help-item">
+          <div class="help-item-title">렌더링 DPI</div>
+          <div class="help-item-desc">PDF를 이미지로 변환할 때의 해상도입니다. 높을수록 선명하지만 파일 크기가 증가합니다. 일반 문서는 150~200, 세밀한 이미지가 포함된 문서는 250 이상을 권장합니다.</div>
+        </div>
+        <div class="help-item">
+          <div class="help-item-title">이미지 배율</div>
+          <div class="help-item-desc">원본 이미지 대비 출력 이미지의 크기 비율입니다. 50%이면 원본의 절반 크기로 출력됩니다. 이메일 본문에 적합한 크기로 조정하세요.</div>
+        </div>
+        <div class="help-item">
+          <div class="help-item-title">여백 줄이기</div>
+          <div class="help-item-desc">페이지 상단/하단/내부의 불필요한 여백을 자동으로 감지하여 줄여줍니다. 이메일에서 불필요한 공백을 제거하여 콘텐츠를 컴팩트하게 만듭니다.</div>
+        </div>
+        <div class="help-item">
+          <div class="help-item-title">여백 탐지</div>
+          <div class="help-item-desc">여백으로 인식할 최소 크기(px)입니다. 이 값보다 큰 빈 공간만 여백으로 탐지합니다. 값이 작으면 작은 여백도 탐지하고, 크면 큰 여백만 탐지합니다.</div>
+        </div>
+        <div class="help-item">
+          <div class="help-item-title">남길 여백</div>
+          <div class="help-item-desc">탐지된 상단/내부 여백에서 남길 비율(%)입니다. 30%이면 원래 여백의 30%만 유지합니다. 0%이면 여백을 모두 제거하고, 100%이면 원본 그대로 유지합니다.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    &copy; 2025 Contentree JoongAng. All rights reserved.
+  </footer>
+
+  <!-- Hidden canvas for PDF rendering - placed offscreen -->
+  <canvas id="pdfCanvas" style="position:absolute;left:-9999px;top:-9999px;visibility:hidden;"></canvas>
+</body>
+</html>

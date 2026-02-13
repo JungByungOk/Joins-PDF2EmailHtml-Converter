@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx electron-forge start:*)",
+      "Bash(npm install:*)",
+      "Bash(npx electron-rebuild:*)",
+      "Bash(timeout /t 15 /nobreak)",
+      "Bash(netstat:*)",
+      "Bash(xargs:*)",
+      "Bash(ss:*)",
+      "Bash(taskkill:*)",
+      "Bash(node:*)",
+      "Bash(npm ls:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm start)",
+      "Bash(findstr:*)",
+      "Bash(cmd /c \"where npm && npm --version && node --version\")",
+      "Bash(cmd.exe /c \"node --version\")",
+      "Bash(powershell.exe -Command \"node --version; npm --version\")",
+      "Bash(powershell.exe -Command \"node --version\")",
+      "Bash(powershell.exe -Command \"Get-ChildItem ''C:\\\\Program Files\\\\nodejs'' -ErrorAction SilentlyContinue | Select-Object Name; Get-ChildItem ''C:\\\\Program Files \\(x86\\)\\\\nodejs'' -ErrorAction SilentlyContinue | Select-Object Name; Get-ChildItem \"\"$env:LOCALAPPDATA\\\\Programs\\\\nodejs\"\" -ErrorAction SilentlyContinue | Select-Object Name; Get-ChildItem \"\"$env:APPDATA\\\\npm\"\" -ErrorAction SilentlyContinue | Select-Object Name\")",
+      "Bash(powershell.exe -Command \"& ''C:\\\\Program Files\\\\nodejs\\\\node.exe'' --version; & ''C:\\\\Program Files\\\\nodejs\\\\npm.cmd'' --version\")",
+      "Bash(powershell.exe -Command \"Set-Location ''C:\\\\Github\\\\pdf2email''; if \\(Test-Path ''node_modules''\\) { Remove-Item -Recurse -Force ''node_modules'' }; & ''C:\\\\Program Files\\\\nodejs\\\\npm.cmd'' install 2>&1\")",
+      "Bash(powershell.exe -Command \"$env:PATH = ''C:\\\\Program Files\\\\nodejs;'' + $env:PATH; Set-Location ''C:\\\\Github\\\\pdf2email''; if \\(Test-Path ''node_modules''\\) { Remove-Item -Recurse -Force ''node_modules'' }; npm install 2>&1\")",
+      "Bash(powershell.exe:*)",
+      "Bash(cmd.exe /c \"set PATH=C:\\\\Program Files\\\\nodejs;%PATH% && cd /d C:\\\\Github\\\\pdf2email && rmdir /s /q node_modules 2>nul && npm install\")",
+      "Bash(export PATH=\"/c/Program Files/nodejs:$PATH\")",
+      "Bash(dir:*)",
+      "Bash(npx asar:*)",
+      "Bash(tasklist:*)",
+      "Bash(FINDSTR:*)",
+      "Bash(cmd.exe //c \"tasklist | findstr /i \"\"PDF\"\"\")",
+      "Bash(\"/c/Github/pdf2email/out/PDF to Email Converter-win32-x64/PDF to Email Converter.exe\")",
+      "Bash(cmd.exe //c \"tasklist | findstr /i \"\"Email\"\"\")",
+      "Bash(cmd.exe //c \"tasklist | findstr Converter\")",
+      "Bash(cmd.exe //c \"taskkill /F /IM \"\"PDF to Email Converter.exe\"\"\")",
+      "Bash(cmd.exe //c \"for /f \"\"tokens=5\"\" %a in \\(''netstat -aon ^| findstr :9000 ^| findstr LISTEN''\\) do @taskkill /F /PID %a\")",
+      "Bash(curl:*)",
+      "Bash(npx electron-forge make:*)"
+    ]
+  }
+}
