@@ -36,7 +36,8 @@
       "Bash(cmd.exe //c \"taskkill /F /IM \"\"PDF to Email Converter.exe\"\"\")",
       "Bash(cmd.exe //c \"for /f \"\"tokens=5\"\" %a in \\(''netstat -aon ^| findstr :9000 ^| findstr LISTEN''\\) do @taskkill /F /PID %a\")",
       "Bash(curl:*)",
-      "Bash(npx electron-forge make:*)"
+      "Bash(npx electron-forge make:*)",
+      "Bash(git init:*)"
     ]
   }
 }
