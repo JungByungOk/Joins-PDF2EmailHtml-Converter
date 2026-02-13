@@ -22,7 +22,7 @@ module.exports = {
     asar: {
       unpackDir: 'node_modules/{sharp,@img,color,color-convert,color-name,color-string,simple-swizzle,is-arrayish,detect-libc,semver}',
     },
-    name: 'PDF to Email Converter',
+    name: 'Joins-PDF2Email-Converter',
     icon: path.join(__dirname, 'src', 'assets', 'icon'),
     afterCopy: [
       (buildPath, electronVersion, platform, arch, callback) => {

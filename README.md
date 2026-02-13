@@ -4,6 +4,16 @@ PDF 보고서를 이메일 친화적인 HTML로 자동 변환하는 Windows 데�
 
 PDF의 각 페이지를 최적화된 PNG 이미지로 렌더링하고, 하이퍼링크를 보존한 채 이메일 본문에 바로 붙여넣을 수 있는 HTML을 생성합니다.
 
+## 스크린샷
+
+![screenshot1](https://github.com/user-attachments/assets/d581a81d-c012-4257-894a-20a6cec7e29f)
+
+![screenshot2](https://github.com/user-attachments/assets/68df03c2-5f63-44a0-bad0-c0f4f1c1f457)
+
+![screenshot3](https://github.com/user-attachments/assets/019dc21f-d71c-4093-96ce-00ff7e5fb12c)
+
+![screenshot4](https://github.com/user-attachments/assets/5e39c6c2-5af6-4beb-b448-007786ad9a9d)
+
 ## 주요 기능
 
 - **PDF → 이메일 HTML 변환** — Base64 이미지 임베딩으로 외부 파일 의존 없음

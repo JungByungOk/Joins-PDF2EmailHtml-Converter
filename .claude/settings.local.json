@@ -37,7 +37,8 @@
       "Bash(cmd.exe //c \"for /f \"\"tokens=5\"\" %a in \\(''netstat -aon ^| findstr :9000 ^| findstr LISTEN''\\) do @taskkill /F /PID %a\")",
       "Bash(curl:*)",
       "Bash(npx electron-forge make:*)",
-      "Bash(git init:*)"
+      "Bash(git init:*)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }

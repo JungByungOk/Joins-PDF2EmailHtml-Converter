@@ -1,6 +1,6 @@
 {
   "name": "pdf2email",
-  "productName": "PDF to Email Converter",
+  "productName": "Joins-PDF2Email-Converter",
   "version": "1.0.0",
   "description": "PDF 보고서를 이메일 친화적인 HTML로 자동 변환",
   "author": "pdf2email",
