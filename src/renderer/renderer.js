@@ -31,6 +31,7 @@ const trimGapSlider = document.getElementById('trimGapSlider');
 const trimGapValue = document.getElementById('trimGapValue');
 const trimKeepSlider = document.getElementById('trimKeepSlider');
 const trimKeepValue = document.getElementById('trimKeepValue');
+const separatorToggle = document.getElementById('separatorToggle');
 const recentSection = document.getElementById('recentSection');
 const recentList = document.getElementById('recentList');
 const helpModal = document.getElementById('helpModal');
@@ -52,7 +53,7 @@ widthSlider.addEventListener('input', () => {
   widthValue.textContent = `${widthSlider.value}%`;
 });
 
-// Trim toggle → enable/disable sub-sliders
+// Trim toggle → enable/disable sub-sliders + separator mutual exclusion
 function updateTrimSliders() {
   const enabled = trimToggle.checked;
   trimGapSlider.disabled = !enabled;
@@ -60,6 +61,13 @@ function updateTrimSliders() {
   document.querySelectorAll('.trim-sub-row').forEach(row => {
     row.classList.toggle('disabled', !enabled);
   });
+  // Separator is mutually exclusive with trim
+  if (enabled) {
+    separatorToggle.checked = false;
+    separatorToggle.disabled = true;
+  } else {
+    separatorToggle.disabled = false;
+  }
 }
 trimToggle.addEventListener('change', updateTrimSliders);
 updateTrimSliders(); // initial state
@@ -242,15 +250,19 @@ btnConvert.addEventListener('click', async () => {
   showSection('progress');
   await window.api.resetPipeline();
 
-  const dpi = parseInt(dpiSlider.value) || 200;
-  const widthPercent = parseInt(widthSlider.value) || 45;
+  const dpi = parseInt(dpiSlider.value) || 250;
+  const widthPercent = parseInt(widthSlider.value) || 135;
 
   try {
     // Process each page sequentially
+    let pdfPageWidthPt = null; // PDF 원본 폭(pt) — DPI 독립 표시 폭 계산용
     for (let i = 1; i <= pdfDoc.numPages; i++) {
       progressText.textContent = `페이지 ${i}/${pdfDoc.numPages} 처리 중...`;
 
       const pageData = await renderPage(pdfDoc, i, pdfCanvas, dpi);
+
+      // 첫 번째 페이지의 PDF 원본 폭을 저장
+      if (i === 1) pdfPageWidthPt = pageData.pdfPageWidthPt;
 
       // Convert width % to actual pixel width based on source image
       const imageWidth = Math.round(pageData.pagePixelWidth * widthPercent / 100);
@@ -274,7 +286,9 @@ btnConvert.addEventListener('click', async () => {
     // Generate output
     progressText.textContent = 'HTML 생성 중...';
     const pdfName = (pdfFilePath || 'output').split(/[/\\]/).pop().replace(/\.pdf$/i, '');
-    const result = await window.api.generateOutput({ pdfName });
+    // HTML 표시 폭은 PDF 원본 크기 × 배율(%)로 계산 (DPI 독립)
+    const displayWidth = Math.round((pdfPageWidthPt || 595) * widthPercent / 100);
+    const result = await window.api.generateOutput({ pdfName, separator: separatorToggle.checked, displayWidth });
 
     outputDir = result.outputDir;
 

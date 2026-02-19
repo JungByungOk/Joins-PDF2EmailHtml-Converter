@@ -102,8 +102,9 @@ class PdfPipeline {
   /**
    * Generate final output: stitch pages into chunks, build image maps, generate HTML.
    */
-  async generateOutput(pdfName) {
+  async generateOutput(pdfName, options = {}) {
     this.pdfName = pdfName || 'output';
+    const useSeparator = options.separator || false;
 
     // Filter out any empty slots (in case pages were processed out of order)
     const validPages = this.pageImages.filter(Boolean);
@@ -115,7 +116,7 @@ class PdfPipeline {
       const chunkStartIndex = i;
 
       // Stitch pages in this chunk into one image
-      const stitched = await stitchPages(chunkPages);
+      const stitched = await stitchPages(chunkPages, { separator: useSeparator });
 
       // Calculate cumulative Y offsets for link coordinate mapping
       let cumulativeY = 0;
@@ -141,6 +142,10 @@ class PdfPipeline {
         }
 
         cumulativeY += chunkPages[j].height;
+        // Add separator height between pages (not after the last page)
+        if (useSeparator && j < chunkPages.length - 1) {
+          cumulativeY += stitched.separatorHeight;
+        }
       }
 
       // Store stitched image for file output
@@ -158,7 +163,9 @@ class PdfPipeline {
     }
 
     // Generate HTML using image map approach
-    const { previewHtml, emailHtml } = generateHtml(chunks);
+    // displayWidth: PDF 원본 크기 × 배율(%)로 계산된 DPI 독립 표시 폭
+    const displayWidth = options.displayWidth || (chunks.length > 0 ? chunks[0].width : 600);
+    const { previewHtml, emailHtml } = generateHtml(chunks, displayWidth);
 
     const outputDir = createOutputFolder(this.pdfName);
     const sizeStatus = this.sizeMonitor.getStatus();

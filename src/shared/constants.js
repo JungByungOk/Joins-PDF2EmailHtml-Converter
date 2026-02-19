@@ -1,11 +1,11 @@
 module.exports = {
   // PDF rendering
-  TARGET_DPI: 200,
+  TARGET_DPI: 250,
   PDF_DPI: 72,
   get SCALE_FACTOR() { return this.TARGET_DPI / this.PDF_DPI; }, // ~2.083
 
   // Image output
-  IMAGE_WIDTH_PERCENT: 45, // default output width as % of source image width
+  IMAGE_WIDTH_PERCENT: 135, // default output width as % of source image width
   PNG_COLORS: 256,
   PNG_COMPRESSION: 9,
 
@@ -16,6 +16,8 @@ module.exports = {
 
   // Page stitching
   MAX_STITCH_PAGES: 30, // max pages per stitched image chunk
+  SEPARATOR_HEIGHT: 2,  // separator line height between pages (px)
+  SEPARATOR_COLOR: { r: 204, g: 204, b: 204, alpha: 1 }, // light gray
 
   // Whitespace trimming
   TRIM_WHITE_THRESHOLD: 250,    // RGB each channel >= this counts as "white"

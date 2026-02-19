@@ -51,7 +51,7 @@ function registerIpcHandlers(mainWindow) {
   });
 
   ipcMain.handle('generate-output', async (_event, data) => {
-    return pipeline.generateOutput(data.pdfName);
+    return pipeline.generateOutput(data.pdfName, { separator: data.separator, displayWidth: data.displayWidth });
   });
 
   ipcMain.handle('reset-pipeline', async () => {

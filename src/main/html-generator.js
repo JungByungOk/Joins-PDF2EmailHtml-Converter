@@ -88,6 +88,10 @@ function generateChunkHtml(chunk, chunkIdx, dw) {
   const hasLinks = chunk.areas && chunk.areas.length > 0;
   const usemapAttr = hasLinks ? ` usemap="#${chunk.mapName}"` : '';
 
+  // Image map coords must match the displayed image size, not the source pixel size.
+  // Scale factor: displayWidth / actual image pixel width
+  const coordScale = dw / chunk.width;
+
   let html = `<tr>
 <td style="padding:0;line-height:0;font-size:0;">
 <img src="data:image/png;base64,${chunk.base64}" width="${dw}" height="${displayHeight}" alt="PDF content" style="display:block;width:100%;height:auto;"${usemapAttr} />`;
@@ -95,7 +99,11 @@ function generateChunkHtml(chunk, chunkIdx, dw) {
   if (hasLinks) {
     html += `\n<map name="${chunk.mapName}">`;
     for (const area of chunk.areas) {
-      html += `\n<area shape="rect" coords="${area.x1},${area.y1},${area.x2},${area.y2}" href="${escapeHtml(area.href)}" target="_blank" alt="${escapeHtml(area.alt)}" />`;
+      const sx1 = Math.round(area.x1 * coordScale);
+      const sy1 = Math.round(area.y1 * coordScale);
+      const sx2 = Math.round(area.x2 * coordScale);
+      const sy2 = Math.round(area.y2 * coordScale);
+      html += `\n<area shape="rect" coords="${sx1},${sy1},${sx2},${sy2}" href="${escapeHtml(area.href)}" target="_blank" alt="${escapeHtml(area.alt)}" />`;
     }
     html += `\n</map>`;
   }

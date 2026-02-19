@@ -1,5 +1,5 @@
 const sharp = require('sharp');
-const { PNG_COMPRESSION, TRIM_WHITE_THRESHOLD, TRIM_RETAIN_MARGIN, TRIM_SAMPLE_COLUMNS, TRIM_SAFE_MARGIN, TRIM_INNER_MIN_GAP, TRIM_INNER_KEEP } = require('../shared/constants');
+const { PNG_COMPRESSION, TRIM_WHITE_THRESHOLD, TRIM_RETAIN_MARGIN, TRIM_SAMPLE_COLUMNS, TRIM_SAFE_MARGIN, TRIM_INNER_MIN_GAP, TRIM_INNER_KEEP, SEPARATOR_HEIGHT, SEPARATOR_COLOR } = require('../shared/constants');
 
 /**
  * Crop a region from the full page image and optimize it as PNG.
@@ -340,17 +340,29 @@ async function stitchPages(pages, options = {}) {
       sizeBytes: pages[0].buffer.length,
       width: pages[0].width,
       height: pages[0].height,
+      separatorHeight: 0,
     };
   }
 
   const targetWidth = pages[0].width;
   const compression = options.compression || PNG_COMPRESSION;
+  const useSeparator = options.separator || false;
+  const sepHeight = useSeparator ? SEPARATOR_HEIGHT : 0;
+
+  // Pre-generate separator strip buffer if needed
+  let separatorBuf = null;
+  if (useSeparator) {
+    separatorBuf = await sharp({
+      create: { width: targetWidth, height: SEPARATOR_HEIGHT, channels: 4, background: SEPARATOR_COLOR },
+    }).png().toBuffer();
+  }
 
   // Calculate total height and prepare composite inputs
   let totalHeight = 0;
   const compositeInputs = [];
 
-  for (const page of pages) {
+  for (let i = 0; i < pages.length; i++) {
+    const page = pages[i];
     let buf = page.buffer;
     let pageHeight = page.height;
 
@@ -369,6 +381,16 @@ async function stitchPages(pages, options = {}) {
       left: 0,
     });
     totalHeight += pageHeight;
+
+    // Insert separator between pages (not after the last page)
+    if (useSeparator && i < pages.length - 1) {
+      compositeInputs.push({
+        input: separatorBuf,
+        top: totalHeight,
+        left: 0,
+      });
+      totalHeight += SEPARATOR_HEIGHT;
+    }
   }
 
   // Create RGBA canvas and composite all pages (4ch to match collapseInnerWhitespace output)
@@ -392,6 +414,7 @@ async function stitchPages(pages, options = {}) {
     sizeBytes: stitched.length,
     width: targetWidth,
     height: totalHeight,
+    separatorHeight: sepHeight,
   };
 }
 

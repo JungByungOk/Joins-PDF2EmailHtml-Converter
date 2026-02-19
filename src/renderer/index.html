@@ -57,70 +57,88 @@
           설정
         </span>
       </div>
-      <div class="setting-row">
-        <label class="setting-label">렌더링 DPI</label>
-        <div class="slider-wrap">
-          <input type="range" id="dpiSlider" class="slider" min="100" max="400" step="1" value="200">
-          <div class="slider-labels">
-            <span>100</span>
-            <span>200</span>
-            <span>300</span>
-            <span>400</span>
-          </div>
-        </div>
-        <span class="setting-value" id="dpiValue">200 DPI</span>
-      </div>
-      <div class="setting-row" style="margin-top:14px;">
-        <label class="setting-label">이미지 배율</label>
-        <div class="slider-wrap">
-          <input type="range" id="widthSlider" class="slider" min="10" max="100" step="1" value="45">
-          <div class="slider-labels">
-            <span>10%</span>
-            <span>30%</span>
-            <span>50%</span>
-            <span>100%</span>
-          </div>
-        </div>
-        <span class="setting-value" id="widthValue">45%</span>
-      </div>
-      <div class="setting-row setting-row-checkbox" style="margin-top:14px;">
-        <label class="setting-label" for="trimToggle">여백 줄이기</label>
-        <label class="toggle-switch">
-          <input type="checkbox" id="trimToggle">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-      <div class="trim-sub-settings">
-        <div class="setting-row trim-sub-row" style="margin-top:10px;">
-          <label class="setting-label">여백 탐지</label>
+
+      <!-- 그룹 1: 이미지 품질 설정 -->
+      <div class="setting-group">
+        <div class="setting-group-title">이미지 품질</div>
+        <div class="setting-row">
+          <label class="setting-label">렌더링 DPI</label>
           <div class="slider-wrap">
-            <input type="range" id="trimGapSlider" class="slider" min="1" max="100" step="1" value="65" disabled>
+            <input type="range" id="dpiSlider" class="slider" min="100" max="400" step="1" value="250">
             <div class="slider-labels">
-              <span>1</span>
-              <span>25</span>
-              <span>50</span>
-              <span>75</span>
               <span>100</span>
+              <span>200</span>
+              <span>300</span>
+              <span>400</span>
             </div>
           </div>
-          <span class="setting-value" id="trimGapValue">65 px</span>
+          <span class="setting-value" id="dpiValue">250 DPI</span>
         </div>
-        <div class="setting-row trim-sub-row" style="margin-top:10px;">
-          <label class="setting-label">남길 여백</label>
+        <div class="setting-row" style="margin-top:14px;">
+          <label class="setting-label">이미지 배율</label>
           <div class="slider-wrap">
-            <input type="range" id="trimKeepSlider" class="slider" min="0" max="100" step="1" value="30" disabled>
+            <input type="range" id="widthSlider" class="slider" min="50" max="150" step="1" value="135">
             <div class="slider-labels">
-              <span>0%</span>
-              <span>25%</span>
               <span>50%</span>
               <span>75%</span>
               <span>100%</span>
+              <span>150%</span>
             </div>
           </div>
-          <span class="setting-value" id="trimKeepValue">30%</span>
+          <span class="setting-value" id="widthValue">135%</span>
+        </div>
+        <p class="setting-hint">DPI와 이미지 배율이 높을수록 선명하지만 용량이 증가합니다</p>
+      </div>
+
+      <!-- 그룹 2: 페이지 레이아웃 설정 -->
+      <div class="setting-group">
+        <div class="setting-group-title">페이지 레이아웃</div>
+        <div class="setting-row setting-row-checkbox">
+          <label class="setting-label" for="trimToggle">여백 줄이기</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="trimToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="trim-sub-settings">
+          <div class="setting-row trim-sub-row" style="margin-top:10px;">
+            <label class="setting-label">여백 탐지</label>
+            <div class="slider-wrap">
+              <input type="range" id="trimGapSlider" class="slider" min="1" max="100" step="1" value="65" disabled>
+              <div class="slider-labels">
+                <span>1</span>
+                <span>25</span>
+                <span>50</span>
+                <span>75</span>
+                <span>100</span>
+              </div>
+            </div>
+            <span class="setting-value" id="trimGapValue">65 px</span>
+          </div>
+          <div class="setting-row trim-sub-row" style="margin-top:10px;">
+            <label class="setting-label">남길 여백</label>
+            <div class="slider-wrap">
+              <input type="range" id="trimKeepSlider" class="slider" min="0" max="100" step="1" value="30" disabled>
+              <div class="slider-labels">
+                <span>0%</span>
+                <span>25%</span>
+                <span>50%</span>
+                <span>75%</span>
+                <span>100%</span>
+              </div>
+            </div>
+            <span class="setting-value" id="trimKeepValue">30%</span>
+          </div>
+        </div>
+        <div class="setting-row setting-row-checkbox" style="margin-top:14px;">
+          <label class="setting-label" for="separatorToggle">페이지 구분선</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="separatorToggle">
+            <span class="toggle-slider"></span>
+          </label>
         </div>
       </div>
-      <p class="setting-hint">DPI와 이미지 배율이 높을수록 선명하지만 용량이 증가합니다</p>
+
       <button id="btnConvert" class="btn btn-primary btn-convert">변환 시작</button>
     </div>
 
@@ -203,6 +221,10 @@
         <div class="help-item">
           <div class="help-item-title">남길 여백</div>
           <div class="help-item-desc">탐지된 상단/내부 여백에서 남길 비율(%)입니다. 30%이면 원래 여백의 30%만 유지합니다. 0%이면 여백을 모두 제거하고, 100%이면 원본 그대로 유지합니다.</div>
+        </div>
+        <div class="help-item">
+          <div class="help-item-title">페이지 구분선</div>
+          <div class="help-item-desc">페이지 사이에 연한 회색 구분선을 삽입합니다. 여백 줄이기가 켜져 있으면 사용할 수 없습니다.</div>
         </div>
       </div>
     </div>
