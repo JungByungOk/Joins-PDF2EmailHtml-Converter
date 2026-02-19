@@ -26,9 +26,9 @@ module.exports = {
     icon: path.join(__dirname, 'src', 'assets', 'icon'),
     afterCopy: [
       (buildPath, electronVersion, platform, arch, callback) => {
-        // Copy sharp and @img native binaries into the packaged app's node_modules
         const projectRoot = path.resolve(__dirname);
-        // sharp + all its dependencies + @img native binaries
+
+        // 1. sharp + 런타임 의존성 복사
         const modules = [
           'sharp', '@img',
           'color', 'color-convert', 'color-name', 'color-string',
@@ -42,6 +42,33 @@ module.exports = {
             copyDirSync(src, dest);
           }
         }
+
+        // 2. 불필요한 Electron DLL 삭제 (~20MB 절감)
+        const appRoot = path.resolve(buildPath, '..', '..');
+        const deleteFiles = [
+          'vk_swiftshader.dll',       // Vulkan 소프트웨어 렌더러 (5MB)
+          'vk_swiftshader_icd.json',  // Vulkan 설정
+          'd3dcompiler_47.dll',       // DirectX 컴파일러 (4.7MB)
+          'libGLESv2.dll',            // OpenGL ES (7.5MB)
+          'libEGL.dll',               // EGL
+          'LICENSES.chromium.html',   // 라이센스 파일
+        ];
+        for (const file of deleteFiles) {
+          const fp = path.join(appRoot, file);
+          if (fs.existsSync(fp)) fs.unlinkSync(fp);
+        }
+
+        // 3. 불필요한 로케일 제거 — en-US, ko만 유지 (~35MB 절감)
+        const localesDir = path.join(appRoot, 'locales');
+        const keepLocales = new Set(['en-US.pak', 'ko.pak']);
+        if (fs.existsSync(localesDir)) {
+          for (const file of fs.readdirSync(localesDir)) {
+            if (!keepLocales.has(file)) {
+              fs.unlinkSync(path.join(localesDir, file));
+            }
+          }
+        }
+
         callback();
       },
     ],
