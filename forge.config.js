@@ -52,7 +52,6 @@ module.exports = {
           'd3dcompiler_47.dll',       // DirectX 컴파일러 (4.7MB)
           'libGLESv2.dll',            // OpenGL ES (7.5MB)
           'libEGL.dll',               // EGL
-          'ffmpeg.dll',               // FFmpeg — 동영상/오디오 미사용 (2.7MB)
           'LICENSES.chromium.html',   // 라이센스 파일
         ];
         for (const file of deleteFiles) {
