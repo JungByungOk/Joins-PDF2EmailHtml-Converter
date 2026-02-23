@@ -146,15 +146,15 @@ export async function renderPage(pdfDoc, pageNumber, canvas, dpi = 300) {
     delete link.pdfRect;
   }
 
-  // Convert canvas to base64 PNG string (IPC-safe)
-  const dataUrl = canvas.toDataURL('image/png');
-  const pngBase64 = dataUrl.replace(/^data:image\/png;base64,/, '');
+  // Convert canvas to ArrayBuffer for efficient IPC transfer (no Base64 overhead)
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+  const pngArrayBuffer = await blob.arrayBuffer();
 
   return {
-    pngBase64,
+    pngBuffer: pngArrayBuffer,  // ArrayBuffer (Base64 인코딩 불필요)
     links,
     pagePixelWidth: Math.round(viewport.width),
     pagePixelHeight: Math.round(viewport.height),
-    pdfPageWidthPt: pdfPageWidth, // PDF page width in points (72 DPI)
+    pdfPageWidthPt: pdfPageWidth,
   };
 }

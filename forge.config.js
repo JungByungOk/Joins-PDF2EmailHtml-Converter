@@ -48,9 +48,11 @@ module.exports = {
         const deleteFiles = [
           'vk_swiftshader.dll',       // Vulkan 소프트웨어 렌더러 (5MB)
           'vk_swiftshader_icd.json',  // Vulkan 설정
+          'vulkan-1.dll',             // Vulkan 런타임 로더 (925KB)
           'd3dcompiler_47.dll',       // DirectX 컴파일러 (4.7MB)
           'libGLESv2.dll',            // OpenGL ES (7.5MB)
           'libEGL.dll',               // EGL
+          'ffmpeg.dll',               // FFmpeg — 동영상/오디오 미사용 (2.7MB)
           'LICENSES.chromium.html',   // 라이센스 파일
         ];
         for (const file of deleteFiles) {
@@ -67,6 +69,26 @@ module.exports = {
               fs.unlinkSync(path.join(localesDir, file));
             }
           }
+        }
+
+        // 4. node_modules 내 불필요한 개발/문서 파일 정리 (~444KB 절감)
+        const cleanPatterns = [/\.md$/i, /\.d\.ts$/, /CHANGELOG/i, /\.cc$/, /\.h$/, /\.gyp$/];
+        const cleanDirs = ['src', 'install'].map(d => path.join(buildPath, 'node_modules', 'sharp', d));
+        for (const dir of cleanDirs) {
+          if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
+        }
+        const nmDir = path.join(buildPath, 'node_modules');
+        if (fs.existsSync(nmDir)) {
+          const walk = (dir) => {
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+              const fp = path.join(dir, entry.name);
+              if (entry.isDirectory()) walk(fp);
+              else if (cleanPatterns.some(p => p.test(entry.name))) {
+                fs.unlinkSync(fp);
+              }
+            }
+          };
+          walk(nmDir);
         }
 
         callback();

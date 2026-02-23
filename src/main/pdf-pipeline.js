@@ -24,12 +24,12 @@ class PdfPipeline {
 
   /**
    * Process a single page: optimize full page image and scale link coordinates.
-   * @param {object} data - { pageIndex, pngBase64, links, pagePixelWidth, pagePixelHeight, totalPages, imageWidth, trimWhitespace, trimGapSize }
+   * @param {object} data - { pageIndex, pngBuffer, links, pagePixelWidth, pagePixelHeight, totalPages, imageWidth, trimWhitespace, trimGapSize }
    * @param {object} [options] - Preset overrides
    */
   async processPage(data, options = {}) {
-    const { pageIndex, pngBase64, links, pagePixelWidth, pagePixelHeight, totalPages, imageWidth, trimWhitespace, trimGapSize, trimKeepPercent } = data;
-    const buffer = Buffer.from(pngBase64, 'base64');
+    const { pageIndex, pngBuffer, links, pagePixelWidth, pagePixelHeight, totalPages, imageWidth, trimWhitespace, trimGapSize, trimKeepPercent } = data;
+    const buffer = Buffer.from(pngBuffer);
 
     // Optimize the full page image (with optional whitespace trimming)
     const result = await optimizeFullPage(buffer, {
@@ -84,8 +84,8 @@ class PdfPipeline {
       height: result.height,
     };
 
-    // Track size
-    this.sizeMonitor.addImage(result.base64, pageIndex);
+    // Track size (buffer byte size → SizeMonitor가 base64 이메일 크기로 환산)
+    this.sizeMonitor.addImage(result.sizeBytes, pageIndex);
 
     // Emit progress
     const sizeStatus = this.sizeMonitor.getStatus();
@@ -108,6 +108,10 @@ class PdfPipeline {
 
     // Filter out any empty slots (in case pages were processed out of order)
     const validPages = this.pageImages.filter(Boolean);
+
+    if (validPages.length === 0) {
+      throw new Error('처리된 페이지가 없습니다. 먼저 processPage를 호출하세요.');
+    }
 
     // Split into chunks of MAX_STITCH_PAGES
     const chunks = [];
@@ -183,12 +187,17 @@ class PdfPipeline {
       pageStats: this.sizeMonitor.getPageStats(),
     };
 
-    writeOutput(outputDir, {
+    await writeOutput(outputDir, {
       previewHtml,
       emailHtml,
       images: this.allImages,
       metadata,
     });
+
+    // 출력 완료 후 대형 버퍼 참조 즉시 해제 (GC 가능하도록)
+    this.pageImages = [];
+    this.pageLinks = [];
+    this.allImages = [];
 
     return {
       outputDir,

@@ -12,33 +12,30 @@ function createOutputFolder(pdfName) {
   const folderName = `${pdfName}_${timestamp}`;
   const outputDir = path.join(app.getPath('documents'), 'pdf2email', folderName);
 
-  fs.mkdirSync(path.join(outputDir, 'images'), { recursive: true });
+  try {
+    fs.mkdirSync(path.join(outputDir, 'images'), { recursive: true });
+  } catch (err) {
+    throw new Error(`출력 폴더 생성 실패 (${outputDir}): ${err.message}`);
+  }
   return outputDir;
 }
 
 /**
  * Write HTML files and metadata to the output folder.
  */
-function writeOutput(outputDir, { previewHtml, emailHtml, images, metadata }) {
-  // Write HTML files
-  fs.writeFileSync(path.join(outputDir, 'preview.html'), previewHtml, 'utf-8');
-  fs.writeFileSync(path.join(outputDir, 'email.html'), emailHtml, 'utf-8');
-
-  // Write individual image files
-  for (const img of images) {
-    fs.writeFileSync(
-      path.join(outputDir, 'images', img.filename),
-      img.buffer
-    );
+async function writeOutput(outputDir, { previewHtml, emailHtml, images, metadata }) {
+  try {
+    await Promise.all([
+      fs.promises.writeFile(path.join(outputDir, 'preview.html'), previewHtml, 'utf-8'),
+      fs.promises.writeFile(path.join(outputDir, 'email.html'), emailHtml, 'utf-8'),
+      fs.promises.writeFile(path.join(outputDir, 'metadata.json'), JSON.stringify(metadata, null, 2), 'utf-8'),
+      ...images.map(img =>
+        fs.promises.writeFile(path.join(outputDir, 'images', img.filename), img.buffer)
+      ),
+    ]);
+  } catch (err) {
+    throw new Error(`파일 저장 실패: ${err.message}`);
   }
-
-  // Write metadata
-  fs.writeFileSync(
-    path.join(outputDir, 'metadata.json'),
-    JSON.stringify(metadata, null, 2),
-    'utf-8'
-  );
-
   return outputDir;
 }
 

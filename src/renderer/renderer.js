@@ -254,23 +254,30 @@ btnConvert.addEventListener('click', async () => {
   const widthPercent = parseInt(widthSlider.value) || 135;
 
   try {
-    // Process each page sequentially
-    let pdfPageWidthPt = null; // PDF 원본 폭(pt) — DPI 독립 표시 폭 계산용
+    // 렌더링(렌더러)과 이미지 처리(메인 프로세스)를 파이프라인으로 병렬화
+    let pdfPageWidthPt = null;
+    let pendingProcess = null;
+
     for (let i = 1; i <= pdfDoc.numPages; i++) {
       progressText.textContent = `페이지 ${i}/${pdfDoc.numPages} 처리 중...`;
 
-      const pageData = await renderPage(pdfDoc, i, pdfCanvas, dpi);
+      // 현재 페이지 렌더링 시작 (이전 페이지 처리와 병렬)
+      const renderPromise = renderPage(pdfDoc, i, pdfCanvas, dpi);
 
-      // 첫 번째 페이지의 PDF 원본 폭을 저장
+      // 이전 페이지의 메인 프로세스 처리 완료 대기
+      if (pendingProcess) await pendingProcess;
+
+      const pageData = await renderPromise;
+
       if (i === 1) pdfPageWidthPt = pageData.pdfPageWidthPt;
 
-      // Convert width % to actual pixel width based on source image
       const imageWidth = Math.round(pageData.pagePixelWidth * widthPercent / 100);
-      // Convert display-px gap slider to source image pixels (based on output image width)
       const displayToSrc = pageData.pagePixelWidth / imageWidth;
-      await window.api.processPage({
+
+      // 현재 페이지의 메인 프로세스 처리를 시작 (다음 렌더링과 병렬)
+      pendingProcess = window.api.processPage({
         pageIndex: i - 1,
-        pngBase64: pageData.pngBase64,
+        pngBuffer: pageData.pngBuffer,
         links: pageData.links,
         pagePixelWidth: pageData.pagePixelWidth,
         pagePixelHeight: pageData.pagePixelHeight,
@@ -282,6 +289,9 @@ btnConvert.addEventListener('click', async () => {
         trimKeepPercent: parseInt(trimKeepSlider.value, 10),
       });
     }
+
+    // 마지막 페이지 처리 완료 대기
+    if (pendingProcess) await pendingProcess;
 
     // Generate output
     progressText.textContent = 'HTML 생성 중...';

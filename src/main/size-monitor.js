@@ -11,13 +11,14 @@ class SizeMonitor {
     this.htmlOverhead = 5000; // estimated base HTML template size
   }
 
-  addImage(base64String, pageIndex) {
-    const bytes = base64String.length; // base64 string length ≈ actual byte cost in email
-    this.totalBytes += bytes;
+  addImage(sizeBytes, pageIndex) {
+    // 이메일에서 base64 인코딩 시 실제 크기 = ceil(bytes/3)*4
+    const emailBytes = Math.ceil(sizeBytes / 3) * 4;
+    this.totalBytes += emailBytes;
     if (!this.pageBytes[pageIndex]) {
       this.pageBytes[pageIndex] = 0;
     }
-    this.pageBytes[pageIndex] += bytes;
+    this.pageBytes[pageIndex] += emailBytes;
     return this.getStatus();
   }
 

@@ -11,17 +11,17 @@ function getRecentFilesPath() {
   return path.join(app.getPath('userData'), 'recent-files.json');
 }
 
-function loadRecentFiles() {
+async function loadRecentFiles() {
   try {
-    const data = fs.readFileSync(getRecentFilesPath(), 'utf-8');
+    const data = await fs.promises.readFile(getRecentFilesPath(), 'utf-8');
     return JSON.parse(data);
   } catch {
     return [];
   }
 }
 
-function saveRecentFiles(files) {
-  fs.writeFileSync(getRecentFilesPath(), JSON.stringify(files, null, 2), 'utf-8');
+async function saveRecentFiles(files) {
+  await fs.promises.writeFile(getRecentFilesPath(), JSON.stringify(files, null, 2), 'utf-8');
 }
 
 function registerIpcHandlers(mainWindow) {
@@ -42,8 +42,12 @@ function registerIpcHandlers(mainWindow) {
   });
 
   ipcMain.handle('read-pdf-file', async (_event, filePath) => {
-    const buffer = fs.readFileSync(filePath);
-    return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+    try {
+      const buffer = await fs.promises.readFile(filePath);
+      return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+    } catch (err) {
+      throw new Error(`PDF 파일을 읽을 수 없습니다: ${err.message}`);
+    }
   });
 
   ipcMain.handle('process-page', async (_event, data) => {
@@ -69,11 +73,11 @@ function registerIpcHandlers(mainWindow) {
 
   // Recent files
   ipcMain.handle('get-recent-files', async () => {
-    return loadRecentFiles();
+    return await loadRecentFiles();
   });
 
   ipcMain.handle('add-recent-file', async (_event, fileInfo) => {
-    const files = loadRecentFiles();
+    const files = await loadRecentFiles();
     // Remove if already exists (to move it to top)
     const filtered = files.filter(f => f.filePath !== fileInfo.filePath);
     // Add to beginning
@@ -85,20 +89,20 @@ function registerIpcHandlers(mainWindow) {
     });
     // Keep only max
     const trimmed = filtered.slice(0, MAX_RECENT_FILES);
-    saveRecentFiles(trimmed);
+    await saveRecentFiles(trimmed);
     return trimmed;
   });
 
   ipcMain.handle('remove-recent-file', async (_event, filePath) => {
-    const files = loadRecentFiles();
+    const files = await loadRecentFiles();
     const filtered = files.filter(f => f.filePath !== filePath);
-    saveRecentFiles(filtered);
+    await saveRecentFiles(filtered);
     return filtered;
   });
 
   ipcMain.handle('file-exists', async (_event, filePath) => {
     try {
-      fs.accessSync(filePath, fs.constants.R_OK);
+      await fs.promises.access(filePath);
       return true;
     } catch {
       return false;
