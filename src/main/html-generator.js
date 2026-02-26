@@ -32,12 +32,12 @@ function buildEmailShell(bodyContent, dw) {
 </noscript>
 <![endif]-->
 <style type="text/css">
-body,table,td,a{margin:0;padding:0;border:0;border-spacing:0;}
+body,table,td,a{margin:0;padding:0;border:none;border-spacing:0;}
 body{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}
 table{border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;}
-td{mso-line-height-rule:exactly;}
-img{border:0;display:block;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;}
-a{display:block;text-decoration:none;border:0;line-height:0;font-size:0;}
+td{mso-line-height-rule:exactly;border:none;}
+img{border:none;display:block;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;}
+a{display:block;text-decoration:none;border:none;outline:none;line-height:0;font-size:0;color:transparent;}
 @media (prefers-color-scheme:dark){
 .email-bg{background-color:#1a1a1a!important;}
 }
@@ -134,11 +134,11 @@ function generateEmailUrlHtml(pages, displayWidth) {
 
   const bodyRows = pages.map(page => {
     const displayHeight = Math.round(page.height * (dw / page.width));
-    const imgTag = `<img src="${page.src}" width="${dw}" height="${displayHeight}" alt="" style="display:block;width:100%;height:auto;border:0;outline:none;margin:0;padding:0;" />`;
+    const imgTag = `<img src="${page.src}" width="${dw}" height="${displayHeight}" alt="" style="display:block;width:100%;height:auto;border:none;outline:none;margin:0;padding:0;" />`;
 
     if (page.firstLink) {
       return `<tr>
-<td style="padding:0;margin:0;line-height:0;font-size:0;border:none;mso-line-height-rule:exactly;"><a href="${escapeHtml(page.firstLink)}" target="_blank" style="display:block;text-decoration:none;border:0;line-height:0;font-size:0;margin:0;padding:0;">${imgTag}</a></td>
+<td style="padding:0;margin:0;line-height:0;font-size:0;border:none;border-collapse:collapse;mso-line-height-rule:exactly;"><a href="${escapeHtml(page.firstLink)}" target="_blank" style="display:block;text-decoration:none;border:none;border-top:none;border-bottom:none;border-left:none;border-right:none;outline:none;line-height:0;font-size:0;margin:0;padding:0;color:transparent;">${imgTag}</a></td>
 </tr>`;
     }
 
