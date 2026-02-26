@@ -1,8 +1,10 @@
+const sharp = require('sharp');
 const { optimizeFullPage, stitchPages } = require('./image-processor');
-const { generateHtml } = require('./html-generator');
+const { generateHtml, generateEmailUrlHtml } = require('./html-generator');
 const { createOutputFolder, writeOutput } = require('./file-manager');
 const { SizeMonitor } = require('./size-monitor');
 const { MAX_STITCH_PAGES, IMAGE_WIDTH_PERCENT } = require('../shared/constants');
+const r2 = require('./r2-uploader');
 
 class PdfPipeline {
   constructor(mainWindow) {
@@ -163,13 +165,105 @@ class PdfPipeline {
         height: stitched.height,
         areas: chunkAreas,
         mapName: `map_${chunkIndex}`,
+        buffer: stitched.buffer,
+        filename,
       });
     }
 
-    // Generate HTML using image map approach
     // displayWidth: PDF 원본 크기 × 배율(%)로 계산된 DPI 독립 표시 폭
     const displayWidth = options.displayWidth || (chunks.length > 0 ? chunks[0].width : 600);
-    const { previewHtml, emailHtml } = generateHtml(chunks, displayWidth);
+
+    // R2 업로드 + Outlook 호환 이메일 HTML 생성
+    // Outlook은 <map>/<area>/usemap을 제거하므로 이미지 슬라이싱 + <a><img> 방식 사용
+    let outlookEmailHtml = null;
+    if (r2.isConfigured()) {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      const folder = `${this.pdfName}_${timestamp}`;
+
+      // 1) 스티칭 이미지 R2 업로드 (브라우저 미리보기용 — image map 링크 작동)
+      for (const chunk of chunks) {
+        const key = `${folder}/${chunk.filename}`;
+        chunk.src = await r2.uploadImage(chunk.buffer, key);
+      }
+
+      // 2) 이미지 슬라이싱 + R2 업로드 (Outlook 이메일용)
+      // 각 페이지를 링크 Y좌표 기준으로 가로 슬라이스로 분할하여
+      // 링크 영역은 <a><img></a>, 비링크 영역은 <img>로 구성
+      const emailSlices = [];
+      let sliceCounter = 0;
+
+      for (let i = 0; i < validPages.length; i++) {
+        const page = validPages[i];
+        const pageLink = this.pageLinks[i];
+        const links = (pageLink && pageLink.links) ? [...pageLink.links] : [];
+
+        if (links.length === 0) {
+          // 링크 없는 페이지 — 이미지 전체 업로드
+          sliceCounter++;
+          const key = `${folder}/slice_${sliceCounter}.png`;
+          const src = await r2.uploadImage(page.buffer, key);
+          emailSlices.push({ src, width: page.width, height: page.height, firstLink: null });
+        } else {
+          // 링크 있는 페이지 — Y좌표 기준으로 슬라이싱
+          links.sort((a, b) => a.top - b.top);
+          let currentY = 0;
+
+          for (const link of links) {
+            const linkTop = Math.max(0, Math.round(link.top));
+            const linkBottom = Math.min(page.height, Math.round(link.bottom));
+            if (linkBottom <= linkTop) continue;
+
+            // 링크 위의 비링크 영역
+            if (linkTop > currentY) {
+              const h = linkTop - currentY;
+              const buf = await sharp(page.buffer)
+                .extract({ left: 0, top: currentY, width: page.width, height: h })
+                .png()
+                .toBuffer();
+              sliceCounter++;
+              const key = `${folder}/slice_${sliceCounter}.png`;
+              const src = await r2.uploadImage(buf, key);
+              emailSlices.push({ src, width: page.width, height: h, firstLink: null });
+            }
+
+            // 링크 영역 슬라이스
+            const linkHeight = linkBottom - linkTop;
+            const buf = await sharp(page.buffer)
+              .extract({ left: 0, top: linkTop, width: page.width, height: linkHeight })
+              .png()
+              .toBuffer();
+            sliceCounter++;
+            const key = `${folder}/slice_${sliceCounter}.png`;
+            const src = await r2.uploadImage(buf, key);
+            emailSlices.push({ src, width: page.width, height: linkHeight, firstLink: link.url });
+
+            currentY = linkBottom;
+          }
+
+          // 마지막 링크 아래의 비링크 영역
+          if (currentY < page.height) {
+            const h = page.height - currentY;
+            const buf = await sharp(page.buffer)
+              .extract({ left: 0, top: currentY, width: page.width, height: h })
+              .png()
+              .toBuffer();
+            sliceCounter++;
+            const key = `${folder}/slice_${sliceCounter}.png`;
+            const src = await r2.uploadImage(buf, key);
+            emailSlices.push({ src, width: page.width, height: h, firstLink: null });
+          }
+        }
+      }
+
+      // Outlook 호환 HTML 생성: 슬라이스별 <a><img></a> 또는 <img>
+      outlookEmailHtml = generateEmailUrlHtml(emailSlices, displayWidth);
+    }
+
+    // 브라우저 미리보기용 HTML (스티칭 이미지 + image map — 브라우저에서는 정상 동작)
+    const { previewHtml, emailHtml: imageMapEmailHtml } = generateHtml(chunks, displayWidth);
+
+    // 이메일 HTML: R2 활성 시 Outlook 호환 버전 사용, 아니면 기존 image map 버전
+    const emailHtml = outlookEmailHtml || imageMapEmailHtml;
 
     const outputDir = createOutputFolder(this.pdfName);
     const sizeStatus = this.sizeMonitor.getStatus();

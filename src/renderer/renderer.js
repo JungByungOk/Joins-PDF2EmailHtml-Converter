@@ -38,10 +38,19 @@ const helpModal = document.getElementById('helpModal');
 const btnCloseHelp = document.getElementById('btnCloseHelp');
 const helpTrigger = document.getElementById('helpTrigger');
 const btnBack = document.getElementById('btnBack');
+const btnCopyEmail = document.getElementById('btnCopyEmail');
+const btnR2Settings = document.getElementById('btnR2Settings');
+const r2Modal = document.getElementById('r2Modal');
+const btnCloseR2 = document.getElementById('btnCloseR2');
+const btnR2Test = document.getElementById('btnR2Test');
+const btnR2Save = document.getElementById('btnR2Save');
+const r2Status = document.getElementById('r2Status');
+const toast = document.getElementById('toast');
 
 let pdfDoc = null;
 let pdfFilePath = null;
 let outputDir = null;
+let r2Configured = false;
 
 // DPI slider
 dpiSlider.addEventListener('input', () => {
@@ -247,6 +256,13 @@ async function handleFileFromDrop(file) {
 btnConvert.addEventListener('click', async () => {
   if (!pdfDoc) return;
 
+  // R2 미설정 시 변환 차단 → R2 설정 팝업 표시
+  if (!r2Configured) {
+    showToast('R2 설정이 필요합니다. 설정을 먼저 완료해주세요.', 3000);
+    openR2Modal();
+    return;
+  }
+
   showSection('progress');
   await window.api.resetPipeline();
 
@@ -320,6 +336,13 @@ btnConvert.addEventListener('click', async () => {
       : 0;
     document.getElementById('statAvgSize').textContent = `${avgKB} KB`;
 
+    // Show/hide copy button based on R2 mode
+    if (r2Configured) {
+      btnCopyEmail.classList.remove('hidden');
+    } else {
+      btnCopyEmail.classList.add('hidden');
+    }
+
     showSection('result');
   } catch (err) {
     alert(`변환 실패: ${err.message}`);
@@ -380,6 +403,107 @@ btnBack.addEventListener('click', () => {
   showSection('drop');
 });
 
+// ── Toast ──────────────────────────────────────
+function showToast(message, duration = 2000) {
+  toast.textContent = message;
+  toast.classList.remove('hidden');
+  // Force reflow
+  void toast.offsetWidth;
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.classList.add('hidden'), 300);
+  }, duration);
+}
+
+// ── R2 Settings Modal ──────────────────────────
+async function openR2Modal() {
+  const settings = await window.api.loadR2Settings();
+  if (settings) {
+    document.getElementById('r2AccountId').value = settings.accountId || '';
+    document.getElementById('r2AccessKeyId').value = settings.accessKeyId || '';
+    document.getElementById('r2SecretKey').value = settings.secretAccessKey || '';
+    document.getElementById('r2BucketName').value = settings.bucketName || '';
+    document.getElementById('r2PublicUrl').value = settings.publicUrl || '';
+  }
+  r2Status.classList.add('hidden');
+  r2Modal.classList.remove('hidden');
+}
+
+btnR2Settings.addEventListener('click', () => {
+  openR2Modal();
+});
+
+btnCloseR2.addEventListener('click', () => {
+  r2Modal.classList.add('hidden');
+});
+
+r2Modal.addEventListener('click', (e) => {
+  if (e.target === r2Modal) {
+    r2Modal.classList.add('hidden');
+  }
+});
+
+function getR2FormValues() {
+  return {
+    accountId: document.getElementById('r2AccountId').value.trim(),
+    accessKeyId: document.getElementById('r2AccessKeyId').value.trim(),
+    secretAccessKey: document.getElementById('r2SecretKey').value.trim(),
+    bucketName: document.getElementById('r2BucketName').value.trim(),
+    publicUrl: document.getElementById('r2PublicUrl').value.trim(),
+  };
+}
+
+btnR2Test.addEventListener('click', async () => {
+  const settings = getR2FormValues();
+  if (!settings.accountId || !settings.accessKeyId || !settings.secretAccessKey || !settings.bucketName) {
+    r2Status.textContent = '모든 필드를 입력해주세요.';
+    r2Status.className = 'r2-status error';
+    r2Status.classList.remove('hidden');
+    return;
+  }
+  r2Status.textContent = '연결 테스트 중...';
+  r2Status.className = 'r2-status';
+  r2Status.classList.remove('hidden');
+  btnR2Test.disabled = true;
+
+  const result = await window.api.testR2Connection(settings);
+  btnR2Test.disabled = false;
+
+  if (result.success) {
+    r2Status.textContent = '연결 성공!';
+    r2Status.className = 'r2-status success';
+  } else {
+    r2Status.textContent = `연결 실패: ${result.error}`;
+    r2Status.className = 'r2-status error';
+  }
+});
+
+btnR2Save.addEventListener('click', async () => {
+  const settings = getR2FormValues();
+  await window.api.saveR2Settings(settings);
+  r2Configured = !!(settings.accountId && settings.secretAccessKey);
+  r2Modal.classList.add('hidden');
+  showToast(r2Configured ? 'R2 설정이 저장되었습니다.' : 'R2 설정이 초기화되었습니다.');
+});
+
+// ── Clipboard Copy ─────────────────────────────
+btnCopyEmail.addEventListener('click', async () => {
+  if (!outputDir) return;
+  const result = await window.api.copyEmailHtml(outputDir);
+  if (result.success) {
+    showToast('이메일 HTML이 클립보드에 복사되었습니다. Outlook에서 붙여넣기(Ctrl+V)하세요.');
+  } else {
+    showToast(`복사 실패: ${result.error}`);
+  }
+});
+
+// ── Check R2 config on startup ─────────────────
+(async () => {
+  const settings = await window.api.loadR2Settings();
+  r2Configured = !!(settings && settings.accountId && settings.secretAccessKey);
+})();
+
 function showSection(section) {
   dropZone.classList.toggle('hidden', section !== 'drop');
   fileInfo.classList.toggle('hidden', section === 'drop' || section === 'result');
@@ -399,6 +523,10 @@ function showSection(section) {
 
   if (section === 'preset') {
     fileInfo.classList.remove('hidden');
+    // R2 미설정 시 자동으로 R2 설정 팝업 표시
+    if (!r2Configured) {
+      setTimeout(() => openR2Modal(), 300);
+    }
   }
 
   if (section === 'drop') {

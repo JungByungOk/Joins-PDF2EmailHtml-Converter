@@ -1,7 +1,7 @@
 {
   "name": "pdf2email",
   "productName": "Joins-PDF2Email-Converter",
-  "version": "1.0.0",
+  "version": "1.1.2",
   "description": "PDF 보고서를 이메일 친화적인 HTML로 자동 변환",
   "author": "pdf2email",
   "license": "MIT",
@@ -24,9 +24,11 @@
     "style-loader": "^4.0.0"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.998.0",
     "@img/sharp-win32-x64": "^0.33.5",
     "electron-squirrel-startup": "^1.0.1",
     "pdfjs-dist": "^4.9.155",
-    "sharp": "^0.33.5"
+    "sharp": "^0.33.5",
+    "tslib": "^2.8.1"
   }
 }

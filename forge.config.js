@@ -20,7 +20,7 @@ function copyDirSync(src, dest) {
 module.exports = {
   packagerConfig: {
     asar: {
-      unpackDir: 'node_modules/{sharp,@img,color,color-convert,color-name,color-string,simple-swizzle,is-arrayish,detect-libc,semver}',
+      unpackDir: 'node_modules/{sharp,@img,color,color-convert,color-name,color-string,simple-swizzle,is-arrayish,detect-libc,semver,@aws-sdk,@smithy,@aws-crypto,@aws,tslib,fast-xml-parser,strnum,bowser}',
     },
     name: 'Joins-PDF2Email-Converter',
     icon: path.join(__dirname, 'src', 'assets', 'icon'),
@@ -34,6 +34,8 @@ module.exports = {
           'color', 'color-convert', 'color-name', 'color-string',
           'simple-swizzle', 'is-arrayish',
           'detect-libc', 'semver',
+          '@aws-sdk', '@smithy', '@aws-crypto', '@aws',
+          'tslib', 'fast-xml-parser', 'strnum', 'bowser',
         ];
         for (const mod of modules) {
           const src = path.join(projectRoot, 'node_modules', mod);

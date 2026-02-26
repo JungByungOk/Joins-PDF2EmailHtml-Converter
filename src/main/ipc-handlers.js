@@ -1,7 +1,9 @@
-const { ipcMain, dialog, shell, app } = require('electron');
+const { ipcMain, dialog, shell, app, clipboard } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const { PdfPipeline } = require('./pdf-pipeline');
+const { loadR2Settings, saveR2Settings } = require('./settings-manager');
+const r2 = require('./r2-uploader');
 
 let pipeline = null;
 
@@ -108,6 +110,48 @@ function registerIpcHandlers(mainWindow) {
       return false;
     }
   });
+
+  // ── R2 Settings ──────────────────────────────
+  ipcMain.handle('load-r2-settings', async () => {
+    return await loadR2Settings();
+  });
+
+  ipcMain.handle('save-r2-settings', async (_event, settings) => {
+    await saveR2Settings(settings);
+    // Re-initialize R2 client with new settings
+    if (settings && settings.accountId && settings.secretAccessKey) {
+      r2.init(settings);
+    }
+    return true;
+  });
+
+  ipcMain.handle('test-r2-connection', async (_event, settings) => {
+    try {
+      await r2.testConnection(settings);
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  });
+
+  // ── Clipboard Copy (email HTML) ──────────────
+  ipcMain.handle('copy-email-html', async (_event, outputDir) => {
+    try {
+      const emailHtmlPath = path.join(outputDir, 'email.html');
+      const html = await fs.promises.readFile(emailHtmlPath, 'utf-8');
+      clipboard.write({ html, text: 'Email HTML content' });
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  });
+
+  // Initialize R2 from saved settings on startup
+  loadR2Settings().then(settings => {
+    if (settings && settings.accountId && settings.secretAccessKey) {
+      r2.init(settings);
+    }
+  }).catch(() => { /* ignore */ });
 }
 
 module.exports = { registerIpcHandlers };
